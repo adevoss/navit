@@ -1,14 +1,26 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
 
 set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.navitproject.navit")
 set(CMAKE_EXECUTABLE_ENABLE_EXPORTS "true")
 set(MACOSX_BUNDLE_BUNDLE_NAME "Navit")
+set(CPACK_PACKAGE_CONTACT "navit@navit-project.org")
+set(CPACK_DEB_COMPONENT_INSTALL ON)
+#set(CPACK_DEBIAN_MAPTOOL_PACKAGE_DEPENDS "")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglib2.0-0 (>= 2.10.0), libprotobuf-c1")
 message(STATUS "Building with CMake V${CMAKE_VERSION}")
 if (DISABLE_CXX)
 	project(navit C)
 else(DISABLE_CXX)
 	project(navit C CXX)
 endif(DISABLE_CXX)
+
+execute_process(
+        COMMAND git describe --tags --dirty
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+)
 
 # Workaround for CMake issue 8345 / 9220, see http://trac.navit-project.org/ticket/1041
 if(DEFINED CMAKE_CXX_COMPILER AND CMAKE_CXX_COMPILER MATCHES "^$")
@@ -21,6 +33,9 @@ endif(NOT DISABLE_CXX)
 set(NAVIT_VERSION_MAJOR "0")
 set(NAVIT_VERSION_MINOR "5")
 set(NAVIT_VERSION_PATCH "6")
+
+set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fno-omit-frame-pointer")
+
 if(ANDROID)
     set(PACKAGE_VERSION "${NAVIT_VERSION_MAJOR}.${NAVIT_VERSION_MINOR}.${NAVIT_VERSION_PATCH}.${ANDROID_ABI}")
 else(ANDROID)
@@ -74,6 +89,7 @@ IF(UNIX AND NOT ANDROID AND NOT APPLE)
 ELSE (UNIX AND NOT ANDROID AND NOT APPLE)
 	SET(LIB_DIR lib/navit CACHE PATH "Navit unix bin path")
 ENDIF (UNIX AND NOT ANDROID AND NOT APPLE)
+set(CMAKE_INSTALL_RPATH \$ORIGIN "\$ORIGIN/../${LIB_DIR}")
 foreach(EXTRA_MODULE ${EXTRA_MODULES})
 	add_module(${EXTRA_MODULE} "extra module specified" TRUE)
 endforeach()
@@ -730,6 +746,7 @@ endif()
 
 set(LOCALEDIR "${LOCALE_DIR}")
 
+
 find_program(BZCAT NAMES bzcat)
 if (SAMPLE_MAP)
 	if(CMAKE_CROSSCOMPILING)
@@ -751,13 +768,7 @@ endif(HAS_IFADDRS)
 
 if(ANDROID)
 	message(STATUS "Using generator " ${CMAKE_GENERATOR})
-	if (NOT ${CMAKE_GENERATOR} STREQUAL Ninja)
-		find_program(ANDROID_LOCATION NAMES android android.bat)
-		if (NOT ANDROID_LOCATION)
-			message_error( "Could not find 'Android SDK and AVD Manager'. Please install the android sdk and add the <android-sdk>/tools directory to the search path.")
-		endif()
-		set(XSLTS "android;${XSLTS}" CACHE STRING "define a semicolon seperated list of XSLTs to process")
-	endif (NOT ${CMAKE_GENERATOR} STREQUAL Ninja)
+	set(XSLTS "android;${XSLTS}" CACHE STRING "define a semicolon seperated list of XSLTs to process")
 	list(APPEND NAVIT_LIBS log)
 	set(HAVE_API_ANDROID 1)
 	set_with_reason(speech/cmdline "Android detected" FALSE)
@@ -824,17 +835,19 @@ endif(XPM2PNG)
 set(XSLTS ${XSLTS} CACHE STRING "define a semicolon seperated list of XSLTs to process")
 
 # Plugins
-if(USE_PLUGINS)
+if(ANDROID)
+	set(SHARED_LIBNAVIT TRUE)
+	add_definitions("-fPIC")
+	list(APPEND NAVIT_LIBS dl)
+elseif(NOT ANDROID AND USE_PLUGINS)
 	set(MODULE_BUILD_TYPE "MODULE")
-	# Acknowledging the want of libnavit_core.so, there is something missing since it doesn't get
-	# installed anywhere. Reverting this for now. -- metalstrolch
-	#	set(SHARED_LIBNAVIT TRUE)
+	set(SHARED_LIBNAVIT TRUE)
 	add_definitions("-fPIC")
 	list(APPEND NAVIT_LIBS dl)
 else()
 	set(MODULE_BUILD_TYPE "STATIC")
 	set(SHARED_LIBNAVIT FALSE)
-endif(USE_PLUGINS)
+endif(ANDROID)
 message(STATUS "Use plugins: ${MODULE_BUILD_TYPE}")
 
 CHECK_INCLUDE_FILES (malloc.h HAVE_MALLOC_H)
@@ -872,14 +885,12 @@ add_compiler_flag_if_available("-Wformat-security")
 add_compiler_flag_if_available("-Werror=format-security")
 
 if (ASAN)
-	message("Enabling ASAN")
+	message(STATUS "Activating AddressSanitizer. To prevent libasan breaking the build, export ASAN_OPTIONS=detect_leaks=0")
 	add_compile_options(-fsanitize=address)
 	add_compile_options(-g)
 	add_compile_options(-fno-omit-frame-pointer)
 	add_link_options(-fsanitize=address)
 	add_link_options(-fno-omit-frame-pointer)
-	set(ASAN_OPTIONS
-		"ASAN_OPTIONS=fast_unwind_on_malloc=false,report_objects=1")
 endif(ASAN)
 
 if(NOT WIN32)

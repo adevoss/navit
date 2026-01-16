@@ -373,7 +373,7 @@ public class Navit extends Activity {
             } else if (naviScheme.equals("geo")
                     && intent.getAction().equals("android.intent.action.VIEW")) {
                 invokeCallbackOnGeo(intent.getData().getSchemeSpecificPart(),
-                        NavitCallbackHandler.MsgType.CLB_SET_DESTINATION, "");
+                        NavitCallbackHandler.MsgType.CLB_COORD_ACTIONS, "");
             }
         }
     }
@@ -405,7 +405,7 @@ public class Navit extends Activity {
 
     private void buildNotification() {
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        PendingIntent appIntent = PendingIntent.getActivity(getApplicationContext(), 0, getIntent(), 0);
+        PendingIntent appIntent = PendingIntent.getActivity(getApplicationContext(), 0, getIntent(), PendingIntent.FLAG_MUTABLE);
 
         Notification navitNotification;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

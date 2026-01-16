@@ -41,6 +41,7 @@
 #define M_PI_4     0.785398163397448309616
 #endif
 
+
 static int in_way, in_node, in_relation;
 osmid nodeid,wayid;
 
@@ -1082,7 +1083,11 @@ void osm_add_tag(char *k, char *v) {
         if (!g_strcmp0(v,"1")) {
             flags[0] |= AF_ONEWAY | AF_ROUNDABOUT_VALID;
         }
-        if (! g_strcmp0(v,"-1")) {
+        else if (! g_strcmp0(v,"0")) {
+            flags[0] &= ~AF_ONEWAY;
+            flags[0] &= ~AF_ONEWAYREV;
+        }
+        else if (! g_strcmp0(v,"-1")) {
             flags[0] |= AF_ONEWAYREV | AF_ROUNDABOUT_VALID;
         }
         if (!in_way)
@@ -1388,7 +1393,9 @@ static void node_buffer_to_hash(void) {
 
 void flush_nodes(int final) {
     fprintf(stderr,"flush_nodes %d\n",final);
-    save_buffer("coords.tmp",&node_buffer,slices*slice_size);
+    char coords_tmp_path[PATH_MAX];
+    snprintf(coords_tmp_path, PATH_MAX, "%s/coords.tmp", tempfile_obtain_prefix());
+    save_buffer(coords_tmp_path,&node_buffer,slices*slice_size);
     if (!final) {
         node_buffer.size=0;
     }
@@ -2279,7 +2286,7 @@ void osm_process_towns(FILE *in, FILE *boundaries, FILE *ways, char *suffix) {
             int i;
 
             if (!tc->country->file) {
-                char *name=g_strdup_printf("country_%d.unsorted.tmp", tc->country->countryid);
+                char *name=g_strdup_printf("%s/country_%d.unsorted.tmp", tempfile_obtain_prefix(), tc->country->countryid);
                 tc->country->file=fopen(name,"wb");
                 g_free(name);
             }
@@ -2365,8 +2372,8 @@ void sort_countries(int keep_tmpfiles) {
             fclose(co->file);
             co->file=NULL;
         }
-        name_in=g_strdup_printf("country_%d.unsorted.tmp", co->countryid);
-        name_out=g_strdup_printf("country_%d.tmp", co->countryid);
+        name_in=g_strdup_printf("%s/country_%d.unsorted.tmp", tempfile_obtain_prefix(), co->countryid);
+        name_out=g_strdup_printf("%s/country_%d.tmp", tempfile_obtain_prefix(), co->countryid);
         co->r=world_bbox;
         item_bin_sort_file(name_in, name_out, &co->r, &co->size);
         if (!keep_tmpfiles)
@@ -4087,7 +4094,7 @@ static void index_country_add(struct zip_info *info, int country_id, char*first_
 void write_countrydir(struct zip_info *zip_info, int max_index_size) {
     int i;
     int max=11;
-    char filename[32];
+    char filename[64];
     struct country_table *co;
     for (i = 0 ; i < sizeof(country_table)/sizeof(struct country_table) ; i++) {
         co=&country_table[i];
@@ -4110,7 +4117,7 @@ void write_countrydir(struct zip_info *zip_info, int max_index_size) {
 
             tile(&co->r, "", tileco, max, overlap, NULL);
 
-            snprintf(filename,sizeof(filename),"country_%d.tmp", co->countryid);
+            snprintf(filename,sizeof(filename),"%s/country_%d.tmp", tempfile_obtain_prefix(), co->countryid);
             in=fopen(filename,"rb");
 
             snprintf(countrypart,sizeof(countrypart),"country_%d_p",co->countryid);
@@ -4183,14 +4190,14 @@ void write_countrydir(struct zip_info *zip_info, int max_index_size) {
 }
 
 void load_countries(void) {
-    char filename[32];
+    char filename[64];
     FILE *f;
     int i;
     struct country_table *co;
 
     for (i = 0 ; i < sizeof(country_table)/sizeof(struct country_table) ; i++) {
         co=&country_table[i];
-        sprintf(filename,"country_%d.tmp", co->countryid);
+        sprintf(filename,"%s/country_%d.tmp", tempfile_obtain_prefix(), co->countryid);
         f=fopen(filename,"rb");
         if (f) {
             int i,first=1;
@@ -4216,18 +4223,18 @@ void load_countries(void) {
 
 void remove_countryfiles(void) {
     int i,j;
-    char filename[32];
+    char filename[64];
     struct country_table *co;
 
     for (i = 0 ; i < sizeof(country_table)/sizeof(struct country_table) ; i++) {
         co=&country_table[i];
         if (co->size) {
-            sprintf(filename,"country_%d.tmp", co->countryid);
+            sprintf(filename,"%s/country_%d.tmp", tempfile_obtain_prefix(), co->countryid);
             unlink(filename);
         }
         for(j=0; j<=co->nparts; j++) {
             char partsuffix[32];
-            sprintf(filename,"country_%d_p", co->countryid);
+            sprintf(filename,"%s/country_%d_p", tempfile_obtain_prefix(), co->countryid);
             sprintf(partsuffix,"%d",j);
             tempfile_unlink(partsuffix,filename);
         }
