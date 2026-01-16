@@ -2810,7 +2810,6 @@ static int navit_set_attr_do(struct navit *this_, struct attr *attr, int init) {
 }
 
 int navit_set_attr(struct navit *this_, struct attr *attr) {
-    dbg(lvl_debug, "-------------------------------- calling generic setter method for attribute type %s", attr_to_name(attr->type))
     return navit_set_attr_do(this_, attr, 0);
 }
 
@@ -2985,6 +2984,20 @@ int navit_get_attr(struct navit *this_, enum attr_type type, struct attr *attr, 
             } else {
                 return 0;
             }
+        }
+        break;
+    case attr_vehicleprofile:
+        if (iter) {
+            if(iter->u.list) {
+                iter->u.list=g_list_next(iter->u.list);
+            } else {
+                iter->u.list=this_->vehicleprofiles;
+            }
+            if(!iter->u.list)
+                return 0;
+            attr->u.vehicleprofile=iter->u.list->data;
+        } else {
+            attr->u.vehicleprofile=this_->vehicleprofile;
         }
         break;
     case attr_zoom:

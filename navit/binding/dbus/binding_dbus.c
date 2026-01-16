@@ -116,7 +116,6 @@ static void *resolve_object(const char *opath, char *type) {
     char *def_navit="/default_navit";
     char *def_gui="/default_gui";
     char *def_graphics="/default_graphics";
-    char *def_voice="/default_voice";
     char *def_vehicle="/default_vehicle";
     char *def_vehicleprofile="/default_vehicleprofile";
     char *def_mapset="/default_mapset";
