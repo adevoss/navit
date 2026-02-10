@@ -8,7 +8,6 @@
 #include "qml_map.h"
 #include "qml_poi.h"
 #include "qml_bookmark.h"
-#include "qml_voice.h"
 #include "qml_vehicle.h"
 
 #include "coord.h"
