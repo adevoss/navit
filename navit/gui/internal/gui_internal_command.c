@@ -1170,9 +1170,8 @@ static int gui_internal_cmd2(struct gui_priv *this, char *function, struct attr 
         gui_internal_cmd2_setting_maps(this, function, in, out);
     else if (!strcmp(function, "setting_rules"))
         gui_internal_cmd2_setting_rules(this, function, in, out);
-    else if(!strcmp(function, "setting_voice"))
+    else if (!strcmp(function, "setting_voice"))
         gui_internal_cmd2_setting_voice(this, function, in, out);
-    else if(!strcmp(function, "setting_vehicle"))
     else if (!strcmp(function, "setting_vehicle"))
         gui_internal_cmd2_setting_vehicle(this, function, in, out);
     else if (!strcmp(function, "town"))
