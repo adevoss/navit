@@ -20,7 +20,6 @@ class Backend : public QObject
     Q_PROPERTY(QQmlListProperty<QObject> pois READ getPois NOTIFY poisChanged)
     Q_PROPERTY(QQmlListProperty<QObject> bookmarks READ getBookmarks NOTIFY bookmarksChanged)
     Q_PROPERTY(QQmlListProperty<QObject> maps READ getMaps NOTIFY mapsChanged)
-    Q_PROPERTY(QQmlListProperty<QObject> voices READ getVoies NOTIFY voicesChanged)
     Q_PROPERTY(QQmlListProperty<QObject> vehicles READ getVehicles NOTIFY vehiclesChanged)
     Q_PROPERTY(PoiObject * activePoi READ activePoi NOTIFY activePoiChanged)
     Q_PROPERTY(BookmarkObject * currentBookmark READ currentBookmark NOTIFY currentBookmarkChanged)
@@ -45,7 +44,6 @@ public:
     QQmlListProperty<QObject> getBookmarks();
     QList < MapObject * > maps;
     QQmlListProperty<QObject> getMaps();
-    QList < MapObject * > voices;
     QList < MapObject * > vehicles;
     QQmlListProperty<QObject> getVehicles();
     PoiObject * activePoi();
@@ -66,7 +64,6 @@ signals:
     void currentBookmarkChanged();
     void currentVehicleChanged();
     void mapsChanged();
-    void voicesChanged();
     void vehiclesChanged();
     void searchResultsChanged();
     void currentCountryChanged();
@@ -78,7 +75,6 @@ public slots:
     void get_maps();
     void get_pois();
     void get_bookmarks();
-    void get_voices();
     void get_vehicles();
     QString get_icon_path();
     QString get_country_icon(char * country_iso_code);
@@ -102,7 +98,6 @@ private:
     QList<QObject *> _pois;
     QList<QObject *> _bookmarks;
     QList<QObject *> _maps;
-    QList<QObject *> _voices;
     QList<QObject *> _vehicles;
     PoiObject * m_activePoi;
     BookmarkObject * m_currentBookmark;
