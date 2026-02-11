@@ -21,6 +21,8 @@ execute_process(
         OUTPUT_STRIP_TRAILING_WHITESPACE
         ERROR_QUIET
 )
+message(STATUS "Navit Git Version: ${GIT_VERSION}")
+
 
 # Workaround for CMake issue 8345 / 9220, see http://trac.navit-project.org/ticket/1041
 if(DEFINED CMAKE_CXX_COMPILER AND CMAKE_CXX_COMPILER MATCHES "^$")
@@ -32,7 +34,7 @@ endif(NOT DISABLE_CXX)
 
 set(NAVIT_VERSION_MAJOR "0")
 set(NAVIT_VERSION_MINOR "5")
-set(NAVIT_VERSION_PATCH "6")
+set(NAVIT_VERSION_PATCH "7")
 
 set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fno-omit-frame-pointer")
 
