@@ -68,7 +68,6 @@ struct log;
 struct vehicle;
 #ifdef HAVE_API_WIN32_BASE
 #    include <windows.h>
-
 #    include "util.h"
 #endif
 #ifdef HAVE_API_WIN32_CE
@@ -157,11 +156,12 @@ struct navit {
     struct log *textfile_debug_log;
     struct pcoord destination;
     int destination_valid;
+    char *destination_description;  // final destination selected by the user
     int blocked; /**< Whether draw operations are currently blocked. This can be a combination of the
                                       following flags:
                                       1: draw operations are blocked
                                       2: draw operations are pending, requiring a redraw once draw operations are
-                    unblocked */
+                                         unblocked */
     int w, h;
     int drag_bitmap;
     int use_mousewheel;
@@ -1619,27 +1619,31 @@ static void navit_mark_navigation_stopped(char *former_destination_file) {
  * @param navit The navit instance
  * @param c The coordinate to start routing to
  * @param description A label which allows the user to later identify this destination in the former destinations
- * selection
+ *        selection
  * @param async Set to 1 to do route calculation asynchronously
  * @return nothing
  */
 void navit_set_destination(struct navit *this_, struct pcoord *c, const char *description, int async) {
     char *destination_file;
     destination_file = bookmarks_get_destination_file(TRUE);
+
     if (c) {
         this_->destination = *c;
         this_->destination_valid = 1;
+        this_->destination_description = g_strdup(description);
 
         dbg(lvl_debug, "c=(%i,%i)", c->x, c->y);
         bookmarks_append_destinations(this_->former_destination, destination_file, c, 1, type_former_destination,
                                       description, this_->recentdest_count);
     } else {
         this_->destination_valid = 0;
+        this_->destination_description = NULL;
         bookmarks_append_destinations(this_->former_destination, destination_file, NULL, 0, type_former_destination,
                                       NULL, this_->recentdest_count);
         navit_mark_navigation_stopped(destination_file);
     }
     g_free(destination_file);
+    dbg(lvl_debug, "this_->destination_description: %s", this_->destination_description);
 
     if (this_->route) {
         struct attr attr;
@@ -2111,6 +2115,7 @@ int navit_init(struct navit *this_) {
     this_->w = 0;
     this_->h = 0;
 
+    dbg(lvl_info, "enter navit_init");
     dbg(lvl_info, "enter gui %p graphics %p", this_->gui, this_->gra);
 
     if (!this_->gui && !(this_->flags & 2)) {
@@ -2871,6 +2876,11 @@ int navit_get_attr(struct navit *this_, enum attr_type type, struct attr *attr, 
         if (!this_->destination_valid)
             return 0;
         attr->u.pcoord = &this_->destination;
+        break;
+    case attr_destination_description:
+        if (!this_->destination_valid)
+            return 0;
+        attr->u.str = g_strdup(this_->destination_description);
         break;
     case attr_displaylist:
         attr->u.displaylist = this_->displaylist;
