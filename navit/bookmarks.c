@@ -726,8 +726,7 @@ static GList *find_destination_in_list(struct former_destination *dest_to_remove
  * @param[in] former_destination_file The name of the output text file
  * @param proj The projection used to represent coordinates in former_destinations' list elements
  */
-static void write_former_destinations(const GList *former_destinations, const char *former_destination_file,
-                                      enum projection proj) {
+static void write_former_destinations(const GList *former_destinations, const char *former_destination_file, enum projection proj) {
     FILE *f;
     const GList *currdest = NULL;
     GList *c_list = NULL;
@@ -771,8 +770,7 @@ static void write_former_destinations(const GList *former_destinations, const ch
  * coordinates will be used to get description.
  * @param limit Limits the number of entries in the "backlog". Set to 0 for "infinite"
  */
-void bookmarks_append_destinations(struct map *former_destination_map, char *former_destination_file, struct pcoord *c,
-                                   int count, enum item_type type, const char *description, int limit) {
+void bookmarks_append_destinations(struct map *former_destination_map, char *former_destination_file, struct pcoord *c, int count, enum item_type type, const char *description, int limit) {
     struct former_destination *new_dest = NULL;
     GList *former_destinations = NULL;
     GList *former_destinations_shortened = NULL;
@@ -807,8 +805,7 @@ void bookmarks_append_destinations(struct map *former_destination_map, char *for
     else
         former_destinations_shortened = former_destinations;
 
-    write_former_destinations(former_destinations_shortened, former_destination_file,
-                              map_projection(former_destination_map));
+    write_former_destinations(former_destinations_shortened, former_destination_file, map_projection(former_destination_map));
     g_list_foreach(former_destinations, (GFunc)free_former_destination, NULL);
     g_list_free(former_destinations);
 }

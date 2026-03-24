@@ -1610,12 +1610,10 @@ void navit_set_destination(struct navit *this_, struct pcoord *c, const char *de
         this_->destination_valid = 1;
 
         dbg(lvl_debug, "c=(%i,%i)", c->x, c->y);
-        bookmarks_append_destinations(this_->former_destination, destination_file, c, 1, type_former_destination,
-                                      description, this_->recentdest_count);
+        bookmarks_append_destinations(this_->former_destination, destination_file, c, 1, type_former_destination, description, this_->recentdest_count);
     } else {
         this_->destination_valid = 0;
-        bookmarks_append_destinations(this_->former_destination, destination_file, NULL, 0, type_former_destination,
-                                      NULL, this_->recentdest_count);
+        bookmarks_append_destinations(this_->former_destination, destination_file, NULL, 0, type_former_destination, NULL, this_->recentdest_count);
         navit_mark_navigation_stopped(destination_file);
     }
     g_free(destination_file);
@@ -1637,8 +1635,7 @@ void navit_set_destination(struct navit *this_, struct pcoord *c, const char *de
             destination_file = bookmarks_get_destination_file(TRUE);
             pc = g_new(struct pcoord, dstcount);
             route_get_destinations(this_->route, pc, dstcount);
-            bookmarks_append_destinations(this_->former_destination, destination_file, pc, dstcount,
-                                          type_former_itinerary, description, this_->recentdest_count);
+            bookmarks_append_destinations(this_->former_destination, destination_file, pc, dstcount, type_former_itinerary, description, this_->recentdest_count);
             g_free(pc);
             g_free(destination_file);
         }
@@ -1663,8 +1660,7 @@ void navit_add_destination_description(struct navit *this_, struct pcoord *c, co
     char *destination_file;
     if (c) {
         destination_file = bookmarks_get_destination_file(TRUE);
-        bookmarks_append_destinations(this_->former_destination, destination_file, c, 1, type_former_destination,
-                                      description, this_->recentdest_count);
+        bookmarks_append_destinations(this_->former_destination, destination_file, c, 1, type_former_destination, description, this_->recentdest_count);
         g_free(destination_file);
     }
 }
@@ -1686,8 +1682,7 @@ void navit_set_destinations(struct navit *this_, struct pcoord *c, int count, co
         this_->destination_valid = 1;
 
         destination_file = bookmarks_get_destination_file(TRUE);
-        bookmarks_append_destinations(this_->former_destination, destination_file, c, count, type_former_itinerary,
-                                      description, this_->recentdest_count);
+        bookmarks_append_destinations(this_->former_destination, destination_file, c, count, type_former_itinerary, description, this_->recentdest_count);
         g_free(destination_file);
     } else
         this_->destination_valid = 0;
@@ -3334,15 +3329,13 @@ static void navit_vehicle_update_position(struct navit *this_, struct navit_vehi
             pc = g_alloca(sizeof(*pc) * count);
             route_get_destinations(this_->route, pc, count);
             destination_file = bookmarks_get_destination_file(TRUE);
-            bookmarks_append_destinations(this_->former_destination, destination_file, pc, count,
-                                          type_former_itinerary_part, description, this_->recentdest_count);
+            bookmarks_append_destinations(this_->former_destination, destination_file, pc, count, type_former_itinerary_part, description, this_->recentdest_count);
             g_free(destination_file);
             g_free(description);
             break;
         case 2:
             destination_file = bookmarks_get_destination_file(TRUE);
-            bookmarks_append_destinations(this_->former_destination, destination_file, NULL, 0,
-                                          type_former_itinerary_part, NULL, this_->recentdest_count);
+            bookmarks_append_destinations(this_->former_destination, destination_file, NULL, 0, type_former_itinerary_part, NULL, this_->recentdest_count);
             navit_set_destination(this_, NULL, NULL, 0);
             g_free(destination_file);
             break;
