@@ -2806,7 +2806,7 @@ struct osd_text_item {
     void *prev;
     void *next;
     enum attr_type section;
-    enum attr_type attr_typ;
+    enum attr_type attr_type;
     void *root;
     int offset;
     char *format;
@@ -3067,8 +3067,8 @@ static void osd_text_draw(struct osd_priv_common *opc, struct navit *navit, stru
 
             if (item) {
                 dbg(lvl_debug, "name %s", item_to_name(item->type));
-                dbg(lvl_debug, "type %s", attr_to_name(oti->attr_typ));
-                if (item_attr_get(item, oti->attr_typ, &attr))
+                dbg(lvl_debug, "type %s", attr_to_name(oti->attr_type));
+                if (item_attr_get(item, oti->attr_type, &attr))
                     value = osd_text_format_attr(&attr, oti->format, imperial);
             }
             if (nav_mr)
@@ -3078,7 +3078,7 @@ static void osd_text_draw(struct osd_priv_common *opc, struct navit *navit, stru
                 navit_get_attr(navit, attr_vehicle, &vehicle_attr, NULL);
             }
             if (vehicle_attr.u.vehicle) {
-                if (vehicle_get_attr(vehicle_attr.u.vehicle, oti->attr_typ, &attr, NULL)) {
+                if (vehicle_get_attr(vehicle_attr.u.vehicle, oti->attr_type, &attr, NULL)) {
                     value = osd_text_format_attr(&attr, oti->format, imperial);
                 }
             }
@@ -3088,7 +3088,7 @@ static void osd_text_draw(struct osd_priv_common *opc, struct navit *navit, stru
             }
             if (tracking) {
                 item = tracking_get_current_item(tracking);
-                if (item && (oti->attr_typ == attr_speed)) {
+                if (item && (oti->attr_type == attr_speed)) {
                     double routespeed = -1;
                     int *flags = tracking_get_current_flags(tracking);
                     if (flags && (*flags & AF_SPEED_LIMIT)
@@ -3107,13 +3107,13 @@ static void osd_text_draw(struct osd_priv_common *opc, struct navit *navit, stru
 
                     value = format_speed(routespeed, "", oti->format, imperial);
                 } else if (item) {
-                    if (tracking_get_attr(tracking, oti->attr_typ, &attr, NULL))
+                    if (tracking_get_attr(tracking, oti->attr_type, &attr, NULL))
                         value = osd_text_format_attr(&attr, oti->format, imperial);
                 }
             }
 
         } else if (oti->section == attr_navit) {
-            if (oti->attr_typ == attr_message) {
+            if (oti->attr_type == attr_message) {
                 struct message *msg;
                 int len, offset;
                 char *tmp;
@@ -3307,23 +3307,23 @@ static void osd_text_prepare(struct osd_priv_common *opc, struct navit *nav) {
             subkey = osd_text_split(key, &index);
 
             if (!strcmp(key, "route_speed")) {
-                oti->attr_typ = attr_speed;
+                oti->attr_type = attr_speed;
             } else {
-                oti->attr_typ = attr_from_name(key);
+                oti->attr_type = attr_from_name(key);
             }
             oti->format = g_strdup(index);
 
         } else if ((oti->section == attr_vehicle || oti->section == attr_navit) && subkey) {
             key = osd_text_split(subkey, &index);
             if (!strcmp(subkey, "messages")) {
-                oti->attr_typ = attr_message;
+                oti->attr_type = attr_message;
             } else {
-                oti->attr_typ = attr_from_name(subkey);
+                oti->attr_type = attr_from_name(subkey);
             }
             oti->format = g_strdup(index);
         }
 
-        switch (oti->attr_typ) {
+        switch (oti->attr_type) {
         default:
             navit_add_callback(nav, callback_new_attr_1(callback_cast(osd_text_draw), attr_position_coord_geo, opc));
             break;
